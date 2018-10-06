@@ -5,7 +5,7 @@ import (
 	"github.com/btcsuite/btcutil"
 )
 
-func GenSubmarineSwapScript(aPub, bPub, paymentHash []byte) ([]byte, error) {
+func GenSubmarineSwapScript(aPub, bPub, paymentHash []byte, lockHeight int64) ([]byte, error) {
 	builder := txscript.NewScriptBuilder()
 
 	builder.AddOp(txscript.OP_HASH160)
@@ -14,7 +14,7 @@ func GenSubmarineSwapScript(aPub, bPub, paymentHash []byte) ([]byte, error) {
 	builder.AddOp(txscript.OP_IF)
 	builder.AddData(aPub)
 	builder.AddOp(txscript.OP_ELSE)
-	builder.AddInt64(6)
+	builder.AddInt64(lockHeight)
 	builder.AddOp(txscript.OP_CHECKLOCKTIMEVERIFY)
 	builder.AddOp(txscript.OP_DROP)
 	builder.AddData(bPub)
