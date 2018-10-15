@@ -3,9 +3,12 @@ package submarinelib
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"fmt"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
+	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 )
 
@@ -36,14 +39,43 @@ func GenSecret() ([]byte, []byte) {
 }
 
 func GenPublicPrivateKeypair () ([]byte, []byte, error) {
-	sessionKey, err := btcec.NewPrivateKey(btcec.S256())
+	key, err := btcec.NewPrivateKey(btcec.S256())
 	if err != nil {
 		return nil, nil, err
 	}
-	return sessionKey.PubKey().SerializeCompressed(), sessionKey.Serialize(), nil
+	return key.PubKey().SerializeCompressed(), key.Serialize(), nil
 }
 
 func GenBase58Address(serializedScript []byte, net *chaincfg.Params) string {
 	scriptHash, _ := btcutil.NewAddressScriptHash(serializedScript, net)
 	return scriptHash.String()
+}
+
+func GetRedeemTransaction(swapTransaction [32]byte, serializedScript []byte, privateKey []byte, redeemScript []byte, amountToRedeem int64, net *chaincfg.Params) (*wire.MsgTx) {
+	redeemTx := wire.NewMsgTx(wire.TxVersion)
+	var hash chainhash.Hash = swapTransaction
+
+	prevOut := wire.NewOutPoint(&hash, 0)
+	txIn := wire.NewTxIn(prevOut, nil, nil)
+	redeemTx.AddTxIn(txIn)
+
+	// Decide what to do with the funds? Send to hot wallet?
+	txOut := wire.NewTxOut(amountToRedeem, redeemScript)
+	redeemTx.AddTxOut(txOut)
+
+	sigScript, err := txscript.SignTxOutput(net,
+		redeemTx, 0, serializedScript, txscript.SigHashAll,
+		txscript.KeyClosure(lookupKey), nil, nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	redeemTx.TxIn[0].SignatureScript = sigScript
+	//redeemTx.TxIn[0].Witness
+
+	return redeemTx
+}
+
+func GetRefundTransaction() {
+
 }
