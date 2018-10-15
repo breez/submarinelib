@@ -43,9 +43,9 @@ OP_CHECKSIG
 14. With only `<bobPubKey>` on the stack, check against `<bobSignature>` returns true and with the private key from step 3 Bob is now in control of the funds
 15. He transfers them elsewhere, Alice got his off-chain and Bob got the on-chain payment
 
-### In case Bob reneges on his obligation to pay Alices off-chain invoice:
+### In case Bob reneges on his obligation to pay Alice's off-chain invoice:
 
-16. Alice needs to wait until lockheight (72 blocks or about 12 hours from when her and Bob agreed on the Swap)
+16. Alice needs to wait until lockheight (72 blocks or about 12 hours from when her and Bob agreed on the swap)
 17. Now that the locktime has passed Alice broadcasts a transaction of her own
 
 ```xml
