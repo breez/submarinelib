@@ -5,7 +5,7 @@ Credit for inventing submarine swaps goes to [Alex Bosworth](https://github.com/
 ### Alice has a lightning network channel open with the Breez (or Bob) node. Her side of the channel is low on funds so she decides to use her on-chain funds to top up:
 
 1. Via an API provided by Bob, whom she has an off-chain channel with, Alice requests an address to pay into. These funds will be used to top up her channel and payment can be independent of Alice's wallet software (can be from an exchange or similar)
-2. Alice generates a private/public keypair and a preimage and then provides Bob with an LN payment hash (the preimage hashed twice, once with SHA-256 and once with RIPEMD-160, resulting in 20 bytes) and the pubkey (33 bytes) for refund in case anything goes wrong. The secrets used to generate these hashes she keeps to herself
+2. Alice generates a private/public keypair and a preimage and then provides Bob with an LN payment hash (the preimage hashed twice, once with SHA-256 and once with RIPEMD-160, resulting in 20 bytes) and the pubkey (33 bytes) for refund in case anything goes wrong. The preimage and the private key she keeps to herself
 3. Bob takes that information from Alice, generates his own private/public keypair (used in case the swap is succesful), and proceeds to use all that data to craft a bitcoin script as follows:
 
 ```xml
