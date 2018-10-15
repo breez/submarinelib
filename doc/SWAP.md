@@ -25,8 +25,8 @@ OP_CHECKSIG
 8. If the two addresses match, Alice now pays to that address
 9. Bob now sees (on the blockchain) that Alice has indeed paid to this address and, via an API, asks her for an LN invoice of that amount
 10. Alice creates an LN invoice with the payment hash and its corresponding preimage secret created in step 2
-11. Alice sends the bolt11 invoice to Bab and now he has until lockheight to fullfill his obligation
-12. Bob pays Alice's invoices and is rewarded with the preimage secret throught the lightning network
+11. Alice sends the bolt11 invoice to Bob and now he has until lockheight to fullfill his obligation
+12. Bob pays Alice's invoice and is rewarded with the preimage secret throught the lightning network
 13. With this proof-of-payment Bob creates a transaction to reedeem the funds, the transaction is equipped with his signature and the 32 byte preimage to unlock the funds thusly:
 
 ```xml
@@ -41,7 +41,7 @@ OP_CHECKSIG
 ```
 
 14. With only `<bobPubKey>` on the stack, check against `<bobSignature>` returns true and with the private key from step 3 Bob is now in control of the funds
-15. He transfers them elsewhere, Alice got his off-chain and Bob got the on-chain payment
+15. He transfers them elsewhere, Alice got her off-chain and Bob got his on-chain payment
 
 ### In case Bob reneges on his obligation to pay Alice's off-chain invoice:
 
