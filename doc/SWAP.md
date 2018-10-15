@@ -40,7 +40,7 @@ OP_ENDIF
 OP_CHECKSIG
 ```
 
-14. With only <bobPubKey> on the stack, check against <bobSignature> returns true and with the private key from step 3 Bob is now in control of the funds
+14. With only `<bobPubKey>` on the stack, check against `<bobSignature>` returns true and with the private key from step 3 Bob is now in control of the funds
 15. He transfers them elsewhere, Alice got his off-chain and Bob got the on-chain payment
 
 ### In case Bob reneges on his obligation to pay Alices off-chain invoice:
@@ -60,5 +60,5 @@ OP_ENDIF
 OP_CHECKSIG 
 ```
 
-18. With only <alicePubKey> on the stack, check against <aliceSignature> returns true and Alice is now in control of the funds
+18. With only `<alicePubKey>` on the stack, check against `<aliceSignature>` returns true and Alice is now in control of the funds
 19. Alice has learned her lesson and will not be conducting business with Bob in the future
