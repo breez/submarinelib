@@ -50,7 +50,7 @@ OP_CHECKSIG
 
 ```xml
 <aliceSignature> OP_0
-OP_HASH160 <paymentHash> OP_EQUAL // <preimage> doesn't match OP_0
+OP_HASH160 <paymentHash> OP_EQUAL // <paymentHash> doesn't match OP_HASH160'd OP_0
 OP_IF
   // So this path is not taken
 OP_ELSE
