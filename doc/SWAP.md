@@ -61,4 +61,3 @@ OP_CHECKSIG
 ```
 
 18. With only `<alicePubKey>` on the stack, check against `<aliceSignature>` returns true and Alice is now in control of the funds
-19. Alice has learned her lesson and will not be conducting business with Bob in the future
