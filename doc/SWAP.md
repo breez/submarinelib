@@ -13,7 +13,7 @@ OP_HASH160 <paymentHash> OP_EQUAL
 OP_IF
   <bobPubKey>
 OP_ELSE
-  <currentBlockHeight + 72> OP_CHECKLOCKTIMEVERIFY OP_DROP <alicePubkey>
+  <72> OP_CHECKSEQUENCEVERIFY  OP_DROP <alicePubkey>
 OP_ENDIF
 OP_CHECKSIG
 ```
@@ -45,7 +45,7 @@ OP_CHECKSIG
 
 ### In case Bob reneges on his obligation to pay Alice's off-chain invoice:
 
-16. Alice needs to wait until lockheight (72 blocks or about 12 hours from when her and Bob agreed on the swap)
+16. Alice needs to wait until 72 blocks or about 12 hours have passed from when the transaction was mined to a block
 17. Now that the locktime has passed Alice broadcasts a transaction of her own
 
 ```xml
@@ -54,7 +54,7 @@ OP_HASH160 <paymentHash> OP_EQUAL // <paymentHash> doesn't match OP_HASH160'd OP
 OP_IF
   // So this path is not taken
 OP_ELSE
-  <cltvExpiry> OP_CHECKLOCKTIMEVERIFY OP_DROP // We check if the lockheight had passed
+  <cltvExpiry> OP_CHECKSEQUENCEVERIFY OP_DROP // We check if the lockheight had passed
   <alicePubKey> // <alicePubKey> is pushed onto the stack
 OP_ENDIF
 OP_CHECKSIG 
