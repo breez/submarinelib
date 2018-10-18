@@ -22,7 +22,7 @@ func GenSubmarineSwapScript(payeePubKey, payerPubKey, preimageHash []byte, lockH
 	builder.AddData(payeePubKey) // Path taken if preimage matches
 	builder.AddOp(txscript.OP_ELSE)
 	builder.AddInt64(lockHeight)
-	builder.AddOp(txscript.OP_CHECKLOCKTIMEVERIFY) // Script will fail here if lockheight higher than current block
+	builder.AddOp(txscript.OP_CHECKSEQUENCEVERIFY)
 	builder.AddOp(txscript.OP_DROP)
 	builder.AddData(payerPubKey) // Refund back to payer
 	builder.AddOp(txscript.OP_ENDIF)
