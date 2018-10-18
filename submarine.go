@@ -1,9 +1,10 @@
 package submarinelib
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
-	"fmt"
+	"encoding/hex"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
@@ -51,31 +52,82 @@ func GenBase58Address(serializedScript []byte, net *chaincfg.Params) string {
 	return scriptHash.String()
 }
 
-func GetRedeemTransaction(swapTransaction [32]byte, serializedScript []byte, privateKey []byte, redeemScript []byte, amountToRedeem int64, net *chaincfg.Params) (*wire.MsgTx) {
-	redeemTx := wire.NewMsgTx(wire.TxVersion)
+func GetRedeemTransaction(totalAmount int64, fee int64, swapTransaction [32]byte, serializedScript []byte, privateKeyBytes []byte, preimage []byte, redeemAddress btcutil.Address) (string, error) {
+	// Redeem as much as possible, after substracting the fee
+	redeemAmount := totalAmount - fee
+
+	// Type 2 supports CSV
+	redeemTx := wire.NewMsgTx(2)
+
+	// We need to reference the swap transactions outpoint
 	var hash chainhash.Hash = swapTransaction
-
 	prevOut := wire.NewOutPoint(&hash, 0)
-	txIn := wire.NewTxIn(prevOut, nil, nil)
-	redeemTx.AddTxIn(txIn)
 
-	// Decide what to do with the funds? Send to hot wallet?
-	txOut := wire.NewTxOut(amountToRedeem, redeemScript)
+
+	// Send the funds to an address
+	redeemScript, err := txscript.PayToAddrScript(redeemAddress)
+	if err != nil {
+		return "", err
+	}
+
+	txOut := wire.NewTxOut(redeemAmount, redeemScript)
 	redeemTx.AddTxOut(txOut)
 
-	sigScript, err := txscript.SignTxOutput(net,
-		redeemTx, 0, serializedScript, txscript.SigHashAll,
-		txscript.KeyClosure(lookupKey), nil, nil)
+	// Sign with out private key
+	privateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), privateKeyBytes)
+	scriptSig, err := txscript.SignatureScript(redeemTx, 0, serializedScript, txscript.SigHashAll, privateKey, true)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return "", err
 	}
-	redeemTx.TxIn[0].SignatureScript = sigScript
-	//redeemTx.TxIn[0].Witness
 
-	return redeemTx
+	txIn := wire.NewTxIn(prevOut, serializedScript, [][]byte{scriptSig, preimage})
+	redeemTx.AddTxIn(txIn)
+
+	// Serialize the transaction and convert to hex string.
+	buf := bytes.NewBuffer(make([]byte, 0, redeemTx.SerializeSize()))
+	err = redeemTx.Serialize(buf)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(buf.Bytes()), nil
 }
 
-func GetRefundTransaction() {
+func GetRefundTransaction(totalAmount int64, fee int64, swapTransaction [32]byte, serializedScript []byte, privateKeyBytes []byte, refundAddress btcutil.Address) (string, error) {
+	// Refund as much as possible, after substracting the fee
+	redeemAmount := totalAmount - fee
 
+	// Type 2 supports CSV
+	redeemTx := wire.NewMsgTx(2)
+
+	// We need to reference the swap transactions outpoint
+	var hash chainhash.Hash = swapTransaction
+	prevOut := wire.NewOutPoint(&hash, 0)
+
+
+	// Send the funds to the refund address
+	redeemScript, err := txscript.PayToAddrScript(refundAddress)
+	if err != nil {
+		return "", err
+	}
+
+	txOut := wire.NewTxOut(redeemAmount, redeemScript)
+	redeemTx.AddTxOut(txOut)
+
+	// Sign with out private key
+	privateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), privateKeyBytes)
+	scriptSig, err := txscript.SignatureScript(redeemTx, 0, serializedScript, txscript.SigHashAll, privateKey, true)
+	if err != nil {
+		return "", err
+	}
+
+	txIn := wire.NewTxIn(prevOut, serializedScript, [][]byte{scriptSig, {txscript.OP_0}})
+	redeemTx.AddTxIn(txIn)
+
+	// Serialize the transaction and convert to hex string.
+	buf := bytes.NewBuffer(make([]byte, 0, redeemTx.SerializeSize()))
+	err = redeemTx.Serialize(buf)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(buf.Bytes()), nil
 }
